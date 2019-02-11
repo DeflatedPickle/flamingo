@@ -10,6 +10,8 @@ sub indent_string {
     }
 }
 
+my @eyes = ('o', '#', '+', '-', '*', '.', '~');
+
 # Occasionally a fancy flamingo
 # TODO: Add a monocle
 my $flamingo_big_top_hat = <<'END_TOP_HAT';
@@ -71,7 +73,7 @@ my $flamingo_small_head = <<'END_FLAMINGO_SMALL_HEAD';
 END_FLAMINGO_SMALL_HEAD
 
 my $flamingo_small = <<'END_FLAMINGO_SMALL';
- /~  \
+ /$  \
 //--| |
 ;   /,/
   ,/ /   _/"""\
@@ -96,10 +98,14 @@ my $flamingo_small_legs = <<'END_FLAMINGO_SMALL_LEGS';
 END_FLAMINGO_SMALL_LEGS
 
 # Get the input text
-# my $text = <STDIN>;
-# chomp $text;
+my $text = $ARGV[0];
+if ($text) {
+    chomp $text;
+}
 
 my $top_hat_chance = int(rand(42));
+
+$flamingo_small =~ s/([\$])/$eyes[int(rand(scalar @eyes))]/g;
 
 # Print the text
 if ($top_hat_chance == 0) {
