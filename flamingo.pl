@@ -24,10 +24,10 @@ sub craft_speech_bubble {
 
     my $speech_bubble = "";
 
-    my $width = 16;
-    my $height = 2;
+    my $width = int(length $text) + 2;
+    my $height = 3;
 
-    foreach my $y (0..$height + 4) {
+    foreach my $y (0..$height + 1) {
         # print $y . "\n";
 
         my @split_text = split(//, $text);
@@ -36,17 +36,20 @@ sub craft_speech_bubble {
             # print $x . "\n";
 
             # Top Left/Bottom Right
-            if ($x == 0 && $y == 0 || $x == $width && $y == $height) {
+            if ($x == 0 && $y == 1 || $x == $width && $y == $height) {
                 $speech_bubble = $speech_bubble . "/";
             }
 
             # Top Middle
             if ($x > 0 && $y == 0) {
-                $speech_bubble = $speech_bubble . "-";
+                $speech_bubble = $speech_bubble . "_";
+            }
+            elsif ($x == 0 && $y == 0 || $x > 0 && $y == 1) {
+                $speech_bubble = $speech_bubble . " ";
             }
 
             # Fill
-            if ($x > 0 && $y > 0 && $x <= $width && $y < $height) {
+            if ($x > 0 && $y > 1 && $x <= $width && $y < $height) {
                 if ($x > 1 && $x - 2 < int(length $text)) {
                     $speech_bubble = $speech_bubble . $split_text[$x - 2];
                 }
@@ -56,18 +59,18 @@ sub craft_speech_bubble {
             }
 
             # Left Side/Right Side
-            if ($x == 0 && $y > 0 && $y < $height || $x == $width && $y > 0 && $y < $height) {
+            if ($x == 0 && $y > 1 && $y < $height || $x == $width && $y > 1 && $y < $height) {
                 $speech_bubble = $speech_bubble . "|";
             }
 
             # Top Right/Bottom Left
-            if ($x == $width && $y == 0 || $x == 0 && $y == $height) {
+            if ($x == $width && $y == 1 || $x == 0 && $y == $height) {
                 $speech_bubble = $speech_bubble . "\\";
             }
 
             # Bottom Middle
             if ($x < $width - 3 && $y == $height) {
-                $speech_bubble = $speech_bubble . "-";
+                $speech_bubble = $speech_bubble . "_";
             }
             elsif ($x > $width - 3 && $y == $height) {
                 $speech_bubble = $speech_bubble . " ";
@@ -100,7 +103,7 @@ sub craft_speech_bubble {
 # After walking into the editors' office,
 # you see, upon the desk, a jar of eyes in front of you...
 # Slowly, they all begin to twist and turn to look at you.
-my @eyes = ('o', "O", '#', '+', '-', '*', '.', '~');
+my @eyes = ('o', "O", '#', '+', '-', '*', '.', '~', '@', '\'', '"', "^", "_");
 
 # Occasionally a fancy flamingo
 # TODO: Add a monocle
