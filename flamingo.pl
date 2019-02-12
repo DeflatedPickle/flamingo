@@ -27,6 +27,8 @@ sub craft_speech_bubble {
     my $width = int(length $text) + 2;
     my $height = 3;
 
+    my $triangle_start = 13;
+
     foreach my $y (0..$height + 1) {
         # print $y . "\n";
 
@@ -69,27 +71,27 @@ sub craft_speech_bubble {
             }
 
             # Bottom Middle
-            if ($x < $width - 3 && $y == $height) {
+            if ($x < $width - 2 && $x != $triangle_start - 1 && $x != $triangle_start && $y == $height) {
                 $speech_bubble = $speech_bubble . "_";
             }
-            elsif ($x > $width - 3 && $y == $height) {
+            elsif ($x >= $triangle_start - 1 && $x <= $triangle_start && $y == $height) {
                 $speech_bubble = $speech_bubble . " ";
             }
 
             # Speech Triangle
-            if ($x >= 0 && $x < $width - 1 && $y > $height && $y < $height + 3) {
+            if ($x >= 0 && $x < $triangle_start + 1 && $y > $height && $y < $height + 3) {
                 $speech_bubble = $speech_bubble . " ";
             }
 
-            if ($x > $width - 3 && $x < $width - 1 && $y > $height && $y < $height + 2) {
+            if ($x == $triangle_start && $y > $height && $y < $height + 2) {
                 $speech_bubble = $speech_bubble . "\\";
             }
 
-            if ($x > $width - 5 && $x < $width - 3 && $y > $height - 1 && $y < $height + 1) {
-                $speech_bubble = $speech_bubble . ".";
+            if (($x == $triangle_start - 2 || $x == $triangle_start && $width > $triangle_start + 2) && $y > $height - 1 && $y < $height + 1) {
+                $speech_bubble = $speech_bubble . ",";
             }
 
-            if ($x == $width && $y > $height && $y < $height + 2) {
+            if ($x == $triangle_start + 1 && $y > $height && $y < $height + 2) {
                 $speech_bubble = $speech_bubble . "/";
             }
         }
