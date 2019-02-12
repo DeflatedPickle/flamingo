@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 
+use Getopt::Long qw(:config require_order auto_help);
+
 my $indent = "                    ";
 my $indent_small = "    ";
 
@@ -98,7 +100,7 @@ sub craft_speech_bubble {
 # After walking into the editors' office,
 # you see, upon the desk, a jar of eyes in front of you...
 # Slowly, they all begin to twist and turn to look at you.
-my @eyes = ('o', '#', '+', '-', '*', '.', '~');
+my @eyes = ('o', "O", '#', '+', '-', '*', '.', '~');
 
 # Occasionally a fancy flamingo
 # TODO: Add a monocle
@@ -122,31 +124,31 @@ my $flamingo_big = <<'END_FLAMINGO';
 |+|,     |  |
  \\/     |  |
   `     /  /
-	   /  /
-	  /  |           _,""""""""\_
-	 |   \_        _/            \_
-	 |     '\    _/  /,  ,         \_
-	 |,      \__/     \;/\   ,       \
-	  `\,                 \,/\   ,/\,/\
-		`\                    \,/      \
-		  \_\      ,_/ ,_/              \
-			`\____/___/__/"""\___,      ,\
-				 || |  \, \,     `\_, \/\;
-				 |  |    \, \,      '\_;
-				 || |      \, \,
-				 | ||        \, \,
-				 |  |         _\, \,
-				 || |        <_  '>
-				 | ;|       ,/' ,/'
-				 <  >      ,/ ,/`
-				 |  |    ,/ ,/
-				 || |  ,/ ,/
-				 |__|,/ ,/
-				 | ,/  /'
-				 |/  /'
-				,/ ,/'
-			  ,/ ,/ |
-			,/  /|  |
+       /  /
+      /  |           _,""""""""\_
+     |   \_        _/            \_
+     |     '\    _/  /,  ,         \_
+     |,      \__/     \;/\   ,       \
+      `\,                 \,/\   ,/\,/\
+        `\                    \,/      \
+          \_\      ,_/ ,_/              \
+            `\____/___/__/"""\___,      ,\
+                 || |  \, \,     `\_, \/\;
+                 |  |    \, \,      '\_;
+                 || |      \, \,
+                 | ||        \, \,
+                 |  |         _\, \,
+                 || |        <_  '>
+                 | ;|       ,/' ,/'
+                 <  >      ,/ ,/`
+                 |  |    ,/ ,/
+                 || |  ,/ ,/
+                 |__|,/ ,/
+                 | ,/  /'
+                 |/  /'
+                ,/ ,/'
+              ,/ ,/ |
+            ,/  /|  |
 END_FLAMINGO
 
 my $flamingo_small_top_hat = <<'END_FLAMINGO_SMALL_HEAD';
@@ -185,25 +187,51 @@ my $flamingo_small_legs = <<'END_FLAMINGO_SMALL_LEGS';
    <--\
 END_FLAMINGO_SMALL_LEGS
 
+my $big_option = 0;
+my $top_hat_option = 0;
+# Get the options
+GetOptions('big' => \$big_option, 'hat' => \$top_hat_option) or die;
+
 # Get the input text
 my $text = join(' ', @ARGV);
 
-my $top_hat_chance = int(rand(42));
+my $top_hat_chance;
+if ($top_hat_option) {
+    $top_hat_chance = 0;
+}
+else {
+    $top_hat_chance = int(rand(42));
+}
 
 # This could have been done with an interpolated string,
 # but I don't feel like doubling up on the backslashes
 $flamingo_small =~ s/([\$])/$eyes[int(rand(scalar @eyes))]/g;
 
-print indent_string(craft_speech_bubble( $text), $indent_small);
+print indent_string(craft_speech_bubble($text), $indent_small);
 
 # Print the text
 if ($top_hat_chance == 0) {
     # print $flamingo_small_top_hat;
-    print indent_string($flamingo_small_top_hat, $indent)
+    if ($big_option) {
+        print indent_string($flamingo_big_top_hat, $indent)
+    }
+    else {
+        print indent_string($flamingo_small_top_hat, $indent)
+    }
 }
 else {
     # print $flamingo_small_head;
-    print indent_string($flamingo_small_head, $indent)
+    if ($big_option) {
+        print indent_string($flamingo_big_head, $indent)
+    }
+    else {
+        print indent_string($flamingo_small_head, $indent)
+    }
 }
 # print $flamingo_small;
-print indent_string($flamingo_small, $indent);
+if ($big_option) {
+    print indent_string($flamingo_big, $indent);
+}
+else {
+    print indent_string($flamingo_small, $indent);
+}
