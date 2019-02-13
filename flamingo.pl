@@ -7,7 +7,7 @@ use Getopt::Long qw(:config require_order auto_help);
 # Credit: https://stackoverflow.com/a/4186180
 sub longest {
     my $max = -1;
-    
+
     for (@_) {
         if (length > $max) {
             $max = length;
@@ -45,7 +45,17 @@ sub craft_speech_bubble {
     foreach my $y (0..$height + 1) {
         # print $y . "\n";
 
-        my @split_text = split(//, $text[0]);
+        my @split_text;
+        # print $y, "\n---", scalar(@text), "\n";
+        if ($y - 2 < scalar(@text) && scalar(@text) > 1) {
+            @split_text = split(//, $text[$y - 2]);
+        }
+        elsif (scalar(@text) == 1) {
+            @split_text = split(//, $text[0]);
+        }
+        else {
+            @split_text = (" ") x $width;
+        }
 
         foreach my $x (0..$width) {
             # print $x . "\n";
@@ -65,8 +75,13 @@ sub craft_speech_bubble {
 
             # Fill
             if ($x > 0 && $y > 1 && $x <= $width && $y < $height) {
-                if ($x > 1 && $x - 2 < int(length $text[0])) {
-                    $speech_bubble = $speech_bubble . $split_text[$x - 2];
+                if ($x > 1 && $x - 2 < $width - 2) {
+                    if (scalar(@split_text) >= $x - 1) {
+                        $speech_bubble = $speech_bubble . $split_text[$x - 2];
+                    }
+                    else {
+                        $speech_bubble = $speech_bubble . " ";
+                    }
                 }
                 else {
                     $speech_bubble = $speech_bubble . " ";
