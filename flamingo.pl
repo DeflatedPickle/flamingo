@@ -198,7 +198,19 @@ my $top_hat_option = 0;
 GetOptions('big' => \$big_option, 'hat' => \$top_hat_option) or die;
 
 # Get the input text
-my $text = join(' ', @ARGV);
+my $text;
+if (@ARGV) {
+    $text = join(' ', @ARGV);
+}
+else {
+    my @pipe_input = ();
+    foreach my $pipe (<>) {
+        $pipe =~ s/^\s+|\s+$//g;
+        push(@pipe_input, $pipe)
+    }
+
+    $text = join(' ', @pipe_input);
+}
 
 my $top_hat_chance;
 if ($top_hat_option) {
