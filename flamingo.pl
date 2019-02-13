@@ -19,12 +19,13 @@ sub indent_string {
 
 sub craft_speech_bubble {
     # TODO: Handle new lines
-    # my @text = split(/\n/, $_[0]);
-    my $text = $_[0];
+    my @text = split(/\n/, $_[0]);
+    # my $text = $_[0];
 
     my $speech_bubble = "";
 
-    my $width = int(length $text) + 2;
+    # my $width = int(length $text) + 2;
+    my $width = 60;
     my $height = 3;
 
     my $triangle_start = 13;
@@ -32,7 +33,7 @@ sub craft_speech_bubble {
     foreach my $y (0..$height + 1) {
         # print $y . "\n";
 
-        my @split_text = split(//, $text);
+        my @split_text = split(//, $text[0]);
 
         foreach my $x (0..$width) {
             # print $x . "\n";
@@ -52,7 +53,7 @@ sub craft_speech_bubble {
 
             # Fill
             if ($x > 0 && $y > 1 && $x <= $width && $y < $height) {
-                if ($x > 1 && $x - 2 < int(length $text)) {
+                if ($x > 1 && $x - 2 < int(length $text[0])) {
                     $speech_bubble = $speech_bubble . $split_text[$x - 2];
                 }
                 else {
@@ -201,11 +202,13 @@ GetOptions('big' => \$big_option, 'hat' => \$top_hat_option) or die;
 my $text;
 if (@ARGV) {
     $text = join(' ', @ARGV);
+    $text =~ s/\\n/\n/g;
 }
 else {
     my @pipe_input = ();
     foreach my $pipe (<>) {
         $pipe =~ s/^\s+|\s+$//g;
+        $pipe =~ s/\\n/\n/g;
         push(@pipe_input, $pipe)
     }
 
