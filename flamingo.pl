@@ -4,6 +4,19 @@ use warnings;
 
 use Getopt::Long qw(:config require_order auto_help);
 
+# Credit: https://stackoverflow.com/a/4186180
+sub longest {
+    my $max = -1;
+    
+    for (@_) {
+        if (length > $max) {
+            $max = length;
+        }
+    }
+
+    return $max;
+}
+
 my $indent = "                    ";
 my $indent_small = "    ";
 
@@ -24,9 +37,8 @@ sub craft_speech_bubble {
 
     my $speech_bubble = "";
 
-    # my $width = int(length $text) + 2;
-    my $width = 60;
-    my $height = 3;
+    my $width = longest(@text) + 2;
+    my $height = (scalar @text) + 2;
 
     my $triangle_start = 13;
 
