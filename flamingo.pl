@@ -17,8 +17,8 @@ sub longest {
     return $max;
 }
 
-my $indent = "                    ";
-my $indent_small = "    ";
+my $indent = (" ") x 20;
+my $indent_small = (" ") x 4;
 
 sub indent_string {
     my $text = "";
@@ -31,14 +31,12 @@ sub indent_string {
 }
 
 sub craft_speech_bubble {
-    # TODO: Handle new lines
     my @text = split(/\n/, $_[0]);
-    # my $text = $_[0];
 
     my $speech_bubble = "";
 
     my $width = longest(@text) + 2;
-    my $height = (scalar @text) + 2;
+    my $height = (scalar(@text)) + 2;
 
     my $triangle_start = 13;
 
@@ -49,10 +47,8 @@ sub craft_speech_bubble {
     }
 
     foreach my $y (0..$height + 1) {
-        # print $y . "\n";
-
         my @split_text;
-        # print $y, "\n---", scalar(@text), "\n";
+
         if ($y - 2 < scalar(@text) && scalar(@text) > 1) {
             @split_text = split(//, $text[$y - 2]);
         }
@@ -64,8 +60,6 @@ sub craft_speech_bubble {
         }
 
         foreach my $x (0..$width) {
-            # print $x . "\n";
-
             # Top Left/Bottom Right
             if ($x == 0 && $y == 1 || $x == $width && $y == $height) {
                 $speech_bubble = $speech_bubble . "/";
@@ -219,17 +213,20 @@ my $flamingo_small = <<'END_FLAMINGO_SMALL';
 END_FLAMINGO_SMALL
 
 my $flamingo_small_legs = <<'END_FLAMINGO_SMALL_LEGS';
-  //||
- \| ||
-  | ||
-    ||
-   <--\
+      //||
+     \| ||
+      | ||
+        ||
+       <--\
 END_FLAMINGO_SMALL_LEGS
 
 my $big_option = 0;
 my $top_hat_option = 0;
+
+my $legs = 'broken';
+
 # Get the options
-GetOptions('big' => \$big_option, 'hat' => \$top_hat_option) or die;
+GetOptions('big' => \$big_option, 'hat' => \$top_hat_option, 'legs' => \$legs) or die;
 
 # Get the input text
 my $text;
@@ -257,7 +254,7 @@ else {
 
 # This could have been done with an interpolated string,
 # but I don't feel like doubling up on the backslashes
-$flamingo_small =~ s/([\$])/$eyes[int(rand(scalar @eyes))]/g;
+$flamingo_small =~ s/([\$])/$eyes[int(rand(scalar(@eyes)))]/g;
 
 print indent_string(craft_speech_bubble($text), $indent_small);
 
@@ -286,4 +283,8 @@ if ($big_option) {
 }
 else {
     print indent_string($flamingo_small, $indent);
+
+    if ($legs eq 1) {
+        print indent_string($flamingo_small_legs, $indent);
+    }
 }
