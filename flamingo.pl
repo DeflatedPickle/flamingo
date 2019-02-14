@@ -40,7 +40,9 @@ sub craft_speech_bubble {
     my $width = longest(@text) + 2;
     my $height = (scalar @text) + 2;
 
-    my $triangle_start = 13;
+    my $triangle_start = $width >= 13 ? 13 : $width - 2;
+
+    $indent_small = join("", (" ") x (length($indent) - $width));
 
     foreach my $y (0..$height + 1) {
         # print $y . "\n";
