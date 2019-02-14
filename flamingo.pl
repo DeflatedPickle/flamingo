@@ -44,7 +44,7 @@ sub craft_speech_bubble {
 
     if ($width < $triangle_start) {
         $triangle_start = $width - 2;
-        
+
         $indent_small = join("", (" ") x (length($indent) - $width));
     }
 
@@ -240,12 +240,11 @@ if (@ARGV) {
 else {
     my @pipe_input = ();
     foreach my $pipe (<>) {
-        $pipe =~ s/^\s+|\s+$//g;
         $pipe =~ s/\\n/\n/g;
-        push(@pipe_input, $pipe)
+        push(@pipe_input, $pipe);
     }
 
-    $text = join(' ', @pipe_input);
+    $text = join('', @pipe_input);
 }
 
 my $top_hat_chance;
