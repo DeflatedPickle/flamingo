@@ -101,7 +101,7 @@ type Person struct {
 	currentRoom *Room
 
 	// The actions this person has done over the night
-	actions []string
+	actions []Action
 }
 
 func NewPerson(name string, ai *AIController, room *Room) *Person {
@@ -112,13 +112,52 @@ func NewPerson(name string, ai *AIController, room *Room) *Person {
 		murderer:    false,
 		inventory:   []*Item{},
 		currentRoom: room,
-		actions:     []string{},
+		actions:     []Action{},
 	}
 }
 
 type Item struct {
 	// The name of the item
 	name string
+}
+
+type Time struct {
+	hours   int
+	minutes int
+}
+
+func (time *Time) String() string {
+	return fmt.Sprintf("%02d:%02d", time.hours, time.minutes)
+}
+
+type Action interface {
+}
+
+type ActionMove struct {
+	Action
+
+	name       string
+	happenedAt Time
+
+	from *Room
+	to   *Room
+
+	direction int
+}
+
+func (action *ActionMove) String() string {
+	return fmt.Sprintf("%s moved from the %s to the %s,", action.happenedAt.String(), action.from.name, action.to.name)
+}
+
+func NewActionMove(time Time, from, to *Room, direction int) *ActionMove {
+	return &ActionMove{
+		Action:     nil,
+		name:       "Move",
+		happenedAt: time,
+		from:       from,
+		to:         to,
+		direction:  direction,
+	}
 }
 
 func main() {
@@ -166,13 +205,14 @@ func main() {
 	// the murder should happen after 8 hours
 	// and then some more actions might happen, to help confuse things
 	for hours < 24 {
-		for minutes <= 60 {
+		for minutes < 60 {
 			fmt.Printf("\nThe clock strikes %02d:%02d PM.\n", hours, minutes)
 
 			// Generate a number for the actions people could do,
 			// check if they can do it,
 			// then roll a dice to see if they do it
 			for _, peep := range people {
+				// Skip if they're dead
 				if !peep.alive {
 					continue
 				}
@@ -180,38 +220,46 @@ func main() {
 				action := rand.Intn(5)
 				willDo := rand.Intn(6)
 
+				// Skip if the dice roll was 1 or 6
+				// Helps thin down the amount of action's by a smidgen
 				if willDo == 1 || willDo == 6 {
 					continue
 				}
 
 				// Non-Event-Based Actions:
-				// 0 - Move rooms north
-				// 1 - Move rooms east
-				// 2 - Move rooms south
-				// 3 - Move rooms west
-				// 4 - Pick up item
-				// 5 - Put down item
+				// 0 - Move rooms, north
+				// 1 - Move rooms, east
+				// 2 - Move rooms, south
+				// 3 - Move rooms, west
+				// 4 - Pick up an item
+				// 5 - Put down an item
+
+				oldRoom := peep.currentRoom
 
 				switch action {
 				case 0:
 					if peep.currentRoom.roomNorth != nil {
 						peep.currentRoom = peep.currentRoom.roomNorth
-						fmt.Printf("The %s enters the %s.\n", peep.name, peep.currentRoom.name)
+						fmt.Printf("The %s leaves the %s and enters the %s.\n", peep.name, oldRoom.name, peep.currentRoom.name)
+						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 0))
 					}
 				case 1:
 					if peep.currentRoom.roomEast != nil {
 						peep.currentRoom = peep.currentRoom.roomEast
-						fmt.Printf("The %s enters the %s.\n", peep.name, peep.currentRoom.name)
+						fmt.Printf("The %s leaves the %s and enters the %s.\n", peep.name, oldRoom.name, peep.currentRoom.name)
+						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 1))
 					}
 				case 2:
 					if peep.currentRoom.roomSouth != nil {
 						peep.currentRoom = peep.currentRoom.roomSouth
-						fmt.Printf("The %s enters the %s.\n", peep.name, peep.currentRoom.name)
+						fmt.Printf("The %s leaves the %s and enters the %s.\n", peep.name, oldRoom.name, peep.currentRoom.name)
+						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 2))
 					}
 				case 3:
 					if peep.currentRoom.roomWest != nil {
 						peep.currentRoom = peep.currentRoom.roomWest
-						fmt.Printf("The %s enters the %s.\n", peep.name, peep.currentRoom.name)
+						fmt.Printf("The %s leaves the %s and enters the %s.\n", peep.name, oldRoom.name, peep.currentRoom.name)
+						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 3))
 					}
 				case 4:
 				case 5:
@@ -225,5 +273,8 @@ func main() {
 		// Increase the hours
 		minutes = 0
 		hours++
+	}
+	for _, peep := range people {
+		fmt.Printf("\nThe actions %s took are as follows; %v", peep.name, peep.actions)
 	}
 }
