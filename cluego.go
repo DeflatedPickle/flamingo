@@ -28,13 +28,13 @@ type Room struct {
 	roomSouth *Room
 }
 
-func NewRoom(name, shortName string, width, height int) *Room {
+func NewRoom(name, shortName string, width, height int, inventory []*Item) *Room {
 	return &Room{
 		name:      name,
 		shortName: shortName,
 		width:     width,
 		height:    height,
-		inventory: []*Item{},
+		inventory: inventory,
 		roomEast:  nil,
 		roomWest:  nil,
 		roomNorth: nil,
@@ -119,6 +119,16 @@ func NewPerson(name string, ai *AIController, room *Room) *Person {
 type Item struct {
 	// The name of the item
 	name string
+
+	// The people that have held this item
+	fingerPrints []*Person
+}
+
+func NewItem(name string) *Item {
+	return &Item{
+		name:         name,
+		fingerPrints: []*Person{},
+	}
 }
 
 type Time struct {
@@ -160,23 +170,73 @@ func NewActionMove(time Time, from, to *Room, direction int) *ActionMove {
 	}
 }
 
+type ActionItem struct {
+	Action
+
+	name       string
+	happenedAt Time
+
+	item *Item
+
+	// True if it was picked up, false if it was put down
+	pickedUp bool
+}
+
+func NewActionItem(time Time, item *Item, pickedUp bool) *ActionItem {
+	return &ActionItem{
+		Action:     nil,
+		name:       "Item",
+		happenedAt: time,
+		item:       item,
+		pickedUp:   pickedUp,
+	}
+}
+
+func (action *ActionItem) String() string {
+	if action.pickedUp {
+		return fmt.Sprintf("%s picked up a %s,", action.happenedAt.String(), action.item.name)
+	}
+	return fmt.Sprintf("%s put down a %s,", action.happenedAt.String(), action.item.name)
+}
+
 func main() {
 	// Set the clock
-	minutes := 00
 	hours := 12
+	minutes := 00
 
 	rand.Seed(time.Now().Unix())
+
+	candelabra := NewItem("Candelabra")
+	candelstick := NewItem("Candlestick")
+
+	plate := NewItem("Plate")
+	tableKnife := NewItem("Table Knife")
+	fork := NewItem("Fork")
+
+	wineGlass := NewItem("Wine Glass")
+
+	kitchenKnife := NewItem("Kitchen Knife")
+
+	pottedPlant := NewItem("Potted Plant")
+
+	book := NewItem("Book")
 
 	// Define the rooms of the house
 	// TODO: Add hallways
 	var house []*Room
 
-	grandFoyer := NewRoom("Grand Foyer", "GF", 20, 32)
-	diningRoom := NewRoom("Dining Room", "DR", 28, 19)
-	kitchen := NewRoom("Kitchen", "K", 12, 19)
-	ballroom := NewRoom("Ballroom", "BR", 38, 28)
-	library := NewRoom("Library", "L", 38, 28)
-	conservatory := NewRoom("Conservatory", "C", 19, 19)
+	grandFoyer := NewRoom("Grand Foyer", "GF", 20, 32,
+		[]*Item{&*candelabra, &*candelabra, &*candelstick})
+	diningRoom := NewRoom("Dining Room", "DR", 28, 19,
+		[]*Item{&*plate, &*plate, &*tableKnife, &*tableKnife, &*fork, &*fork, &*wineGlass, &*wineGlass})
+	kitchen := NewRoom("Kitchen", "K", 12, 19,
+		[]*Item{&*kitchenKnife})
+	ballroom := NewRoom("Ballroom", "BR", 38, 28,
+		[]*Item{&*pottedPlant, &*candelabra})
+	library := NewRoom("Library", "L", 38, 28,
+		[]*Item{&*book, &*book, &*book, &*candelstick, &*candelstick})
+	conservatory := NewRoom("Conservatory", "C", 19, 19,
+		[]*Item{&*pottedPlant})
 
 	house = append(house, grandFoyer, diningRoom, kitchen, ballroom, library, conservatory)
 
@@ -217,52 +277,126 @@ func main() {
 					continue
 				}
 
-				action := rand.Intn(5)
+				action := rand.Intn(9)
 				willDo := rand.Intn(6)
-
-				// Skip if the dice roll was 1 or 6
-				// Helps thin down the amount of action's by a smidgen
-				if willDo == 1 || willDo == 6 {
-					continue
-				}
+				// fmt.Println("--------", action, willDo)
 
 				// Non-Event-Based Actions:
-				// 0 - Move rooms, north
-				// 1 - Move rooms, east
-				// 2 - Move rooms, south
-				// 3 - Move rooms, west
-				// 4 - Pick up an item
-				// 5 - Put down an item
+				// 0..2 - Nothing
+				// 3 - Move rooms, north
+				// 4 - Move rooms, east
+				// 5 - Move rooms, south
+				// 6 - Move rooms, west
+				// 7 - Pick up an item
+				// 8 - Put down an item
 
-				oldRoom := peep.currentRoom
+				nothingMax := 2
 
-				switch action {
-				case 0:
+				switch {
+				case 0 <= action && action <= nothingMax:
+					// Do nothing
+				case action == nothingMax + 1:
+					// Skip if the dice roll was 0 or 5
+					// Helps thin down the amount of action's by a smidgen
+					if willDo == 0 || willDo == 5 {
+						continue
+					}
+
 					if peep.currentRoom.roomNorth != nil {
+						oldRoom := peep.currentRoom
+
 						peep.currentRoom = peep.currentRoom.roomNorth
 						fmt.Printf("The %s leaves the %s and enters the %s.\n", peep.name, oldRoom.name, peep.currentRoom.name)
 						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 0))
 					}
-				case 1:
+				case action == nothingMax + 2:
+					// Skip if the dice roll was 0 or 5
+					// Helps thin down the amount of action's by a smidgen
+					if willDo == 0 || willDo == 5 {
+						continue
+					}
+
 					if peep.currentRoom.roomEast != nil {
+						oldRoom := peep.currentRoom
+
 						peep.currentRoom = peep.currentRoom.roomEast
 						fmt.Printf("The %s leaves the %s and enters the %s.\n", peep.name, oldRoom.name, peep.currentRoom.name)
 						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 1))
 					}
-				case 2:
+				case action == nothingMax + 3:
+					// Skip if the dice roll was 0 or 5
+					// Helps thin down the amount of action's by a smidgen
+					if willDo == 0 || willDo == 5 {
+						continue
+					}
+
 					if peep.currentRoom.roomSouth != nil {
+						oldRoom := peep.currentRoom
+
 						peep.currentRoom = peep.currentRoom.roomSouth
 						fmt.Printf("The %s leaves the %s and enters the %s.\n", peep.name, oldRoom.name, peep.currentRoom.name)
 						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 2))
 					}
-				case 3:
+				case action == nothingMax + 4:
+					// Skip if the dice roll was 0 or 5
+					// Helps thin down the amount of action's by a smidgen
+					if willDo == 0 || willDo == 5 {
+						continue
+					}
+
 					if peep.currentRoom.roomWest != nil {
+						oldRoom := peep.currentRoom
+
 						peep.currentRoom = peep.currentRoom.roomWest
 						fmt.Printf("The %s leaves the %s and enters the %s.\n", peep.name, oldRoom.name, peep.currentRoom.name)
 						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 3))
 					}
-				case 4:
-				case 5:
+				case action == nothingMax + 5:
+					// Skip if the dice roll was 2 or 3
+					// Helps thin down the amount of action's by a smidgen
+					if willDo == 2 || willDo == 3 {
+						continue
+					}
+
+					// Is their inventory not full?
+					if len(peep.inventory) < 4 {
+						roomInventory := peep.currentRoom.inventory
+
+						index := rand.Intn(len(roomInventory))
+						item := roomInventory[index]
+
+						// Add the item to the persons' inventory
+						peep.inventory = append(peep.inventory, item)
+						// Remove the item from the rooms' inventory
+						roomInventory = append(roomInventory[:index], roomInventory[index+1:]...)
+
+						fmt.Printf("The %s picks up a %s.\n", peep.name, item.name)
+						peep.actions = append(peep.actions, NewActionItem(Time{hours: hours, minutes: minutes}, item, true))
+
+						item.fingerPrints = append(item.fingerPrints, peep)
+					}
+				case action == nothingMax + 6:
+					// Skip if the dice roll was 2 or 3
+					// Helps thin down the amount of action's by a smidgen
+					if willDo == 2 || willDo == 3 {
+						continue
+					}
+
+					// Do they have any items?
+					if len(peep.inventory) > 0 {
+						roomInventory := peep.currentRoom.inventory
+
+						index := rand.Intn(len(peep.inventory))
+						item := peep.inventory[index]
+
+						// Remove the item from the persons' inventory
+						peep.inventory = append(peep.inventory[:index], peep.inventory[index+1:]...)
+						// Add the item to the room' inventory
+						roomInventory = append(roomInventory, item)
+
+						fmt.Printf("The %s put down a %s.\n", peep.name, item.name)
+						peep.actions = append(peep.actions, NewActionItem(Time{hours: hours, minutes: minutes}, item, false))
+					}
 				}
 			}
 
