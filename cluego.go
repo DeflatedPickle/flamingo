@@ -281,21 +281,14 @@ func main() {
 				willDo := rand.Intn(6)
 				// fmt.Println("--------", action, willDo)
 
-				// Non-Event-Based Actions:
-				// 0..2 - Nothing
-				// 3 - Move rooms, north
-				// 4 - Move rooms, east
-				// 5 - Move rooms, south
-				// 6 - Move rooms, west
-				// 7 - Pick up an item
-				// 8 - Put down an item
-
 				nothingMax := 2
 
 				switch {
 				case 0 <= action && action <= nothingMax:
 					// Do nothing
 				case action == nothingMax + 1:
+					// Move rooms, north
+
 					// Skip if the dice roll was 0 or 5
 					// Helps thin down the amount of action's by a smidgen
 					if willDo == 0 || willDo == 5 {
@@ -310,6 +303,8 @@ func main() {
 						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 0))
 					}
 				case action == nothingMax + 2:
+					// Move rooms, east
+
 					// Skip if the dice roll was 0 or 5
 					// Helps thin down the amount of action's by a smidgen
 					if willDo == 0 || willDo == 5 {
@@ -324,6 +319,8 @@ func main() {
 						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 1))
 					}
 				case action == nothingMax + 3:
+					// Move rooms, south
+
 					// Skip if the dice roll was 0 or 5
 					// Helps thin down the amount of action's by a smidgen
 					if willDo == 0 || willDo == 5 {
@@ -338,6 +335,8 @@ func main() {
 						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 2))
 					}
 				case action == nothingMax + 4:
+					// Move rooms, west
+
 					// Skip if the dice roll was 0 or 5
 					// Helps thin down the amount of action's by a smidgen
 					if willDo == 0 || willDo == 5 {
@@ -352,6 +351,8 @@ func main() {
 						peep.actions = append(peep.actions, NewActionMove(Time{hours: hours, minutes: minutes}, oldRoom, peep.currentRoom, 3))
 					}
 				case action == nothingMax + 5:
+					// Pick up an item
+
 					// Skip if the dice roll was 2 or 3
 					// Helps thin down the amount of action's by a smidgen
 					if willDo == 2 || willDo == 3 {
@@ -376,6 +377,8 @@ func main() {
 						item.fingerPrints = append(item.fingerPrints, peep)
 					}
 				case action == nothingMax + 6:
+					// Put down an item
+
 					// Skip if the dice roll was 2 or 3
 					// Helps thin down the amount of action's by a smidgen
 					if willDo == 2 || willDo == 3 {
